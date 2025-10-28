@@ -31,6 +31,9 @@ local g = {
     SibuatanLoop = false,
     LembayanaLoop = false,
     AtinLoop = false,
+    TpToPlayer = false,
+    SpecToPlayer = false,
+    MultiFling = false,
 }
 
 -- ==== UTILITY ==== --
@@ -561,7 +564,7 @@ local bringpart = Tabs.Other:Button({
 })
 
 -- ==== TOGGLE ANTI FLING === --
-local antifling = Tabs.Other:Toggle({
+local antifling = Tabs.Other:Button({
     Title = "Anti Fling",
     Desc = "membuat karakter anti terhadap fling atau lemparan",
     Locked = false,
@@ -571,12 +574,42 @@ local antifling = Tabs.Other:Toggle({
 })
 
 -- ==== TOGGLE ANTI AFK === --
-local antiafk = Tabs.Other:Toggle({
+local antiafk = Tabs.Other:Button({
     Title = "Anti Afk",
     Desc = "membuat karakter anti terhadap afk",
     Locked = false,
     Callback = function(state) 
         loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/ANTI-AFK/refs/heads/main/ANTI%20AFK"))()
+    end
+})
+
+-- ==== TELEPORT TO PLAYER GUI BRM ==== --
+Tabs.Misc:Button({
+    Title = "Teleport To Player",
+    Desc = "memunculkan gui teleport to player",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/TELEPORT-TO-PLAYER/refs/heads/main/teleporttoplayer.txt"))()
+    end
+})
+
+-- ==== SPECTATE TO PLAYER GUI BRM ==== --
+Tabs.Misc:Button({
+    Title = "Teleport To Player",
+    Desc = "memunculkan gui spectate to player",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/SPECTATE-TO-PLAYER-/refs/heads/main/spectatetoplayer.txt"))()
+    end
+})
+
+-- ==== MULTI FLING GUI BRM ==== --
+Tabs.Misc:Button({
+    Title = "Multi Fling",
+    Desc = "memunculkan gui multi fling",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/MULTI-FLING/refs/heads/main/multiflingbrembo.txt"))()
     end
 })
 
@@ -1437,5 +1470,6 @@ if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
     
 
 end
+
 
 
