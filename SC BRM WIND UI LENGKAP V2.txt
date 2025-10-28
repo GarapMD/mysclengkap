@@ -563,7 +563,7 @@ local bringpart = Tabs.Other:Button({
     end
 })
 
--- ==== TOGGLE ANTI FLING === --
+-- ==== BUTTON ANTI FLING === --
 local antifling = Tabs.Other:Button({
     Title = "Anti Fling",
     Desc = "membuat karakter anti terhadap fling atau lemparan",
@@ -1470,6 +1470,7 @@ if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
     
 
 end
+
 
 
 
