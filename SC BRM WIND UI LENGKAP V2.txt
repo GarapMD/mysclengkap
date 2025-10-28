@@ -565,7 +565,7 @@ local teleport to player = Tabs.Misc:Button({
 
 -- ==== SPECTATE TO PLAYER GUI BRM ==== --
 local spectate to player = Tabs.Misc:Button({
-    Title = "Teleport To Player",
+    Title = "Spectate To Player",
     Desc = "memunculkan gui spectate to player",
     Locked = false,
     Callback = function(state) 
@@ -574,9 +574,9 @@ local spectate to player = Tabs.Misc:Button({
 })
 
 -- ==== MULTI FLING GUI BRM ==== --
-local spectate to player = Tabs.Misc:Button({
-    Title = "Teleport To Player",
-    Desc = "memunculkan gui spectate to player",
+local multi fling brm = Tabs.Misc:Button({
+    Title = "Multi Fling",
+    Desc = "memunculkan gui multi fling",
     Locked = false,
     Callback = function(state) 
         loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/MULTI-FLING/refs/heads/main/multiflingbrembo.txt"))()
@@ -1468,4 +1468,5 @@ if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
         print("- " .. (title or "Unknown"))
     end
     
+
 end
