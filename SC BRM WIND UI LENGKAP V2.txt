@@ -595,7 +595,7 @@ Tabs.Misc:Button({
 
 -- ==== SPECTATE TO PLAYER GUI BRM ==== --
 Tabs.Misc:Button({
-    Title = "Teleport To Player",
+    Title = "Spectate To Player",
     Desc = "memunculkan gui spectate to player",
     Locked = false,
     Callback = function(state) 
@@ -1470,6 +1470,7 @@ if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
     
 
 end
+
 
 
 
