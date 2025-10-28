@@ -511,7 +511,7 @@ local walkspeed = Tabs.Main:Slider({
 })
 
 -- ==== BUTTON FLY ==== --
-Tabs.Main:Button({
+local flygui = Tabs.Main:Button({
     Title = "FLY GUI",
     Desc = "mengaktifkan menu terbang",
     Locked = false,
@@ -521,7 +521,7 @@ Tabs.Main:Button({
 })
 
 -- ==== BUTTON REJOIN SERVER ==== --
-Tabs.Misc:Button({
+local rejoin = Tabs.Misc:Button({
     Title = "Rejoin Server",
     Desc = "bergabung kembali diserver saat ini",
     Locked = false,
@@ -531,7 +531,7 @@ Tabs.Misc:Button({
 })
 
 -- ==== BUTTON HOP SERVER ==== --
-Tabs.Misc:Button({
+local hopserver = Tabs.Misc:Button({
     Title = "Hop Server",
     Desc = "bergabung ke server baru / server sepi",
     Locked = false,
@@ -551,7 +551,7 @@ local esp = Tabs.Misc:Button({
 })
 
 -- ==== BUTTON BRINGPART ==== --
-local esp = Tabs.Other:Button({
+local bringpart = Tabs.Other:Button({
     Title = "Bring Part",
     Desc = "memunculkan tool bring part",
     Locked = false,
@@ -1437,4 +1437,5 @@ if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
     
 
 end
+
 
