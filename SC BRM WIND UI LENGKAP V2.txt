@@ -1,0 +1,1471 @@
+-- ==== LOAD ==== --
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HRP = Character:WaitForChild("HumanoidRootPart")
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+
+-- ==== STATE TABLE ==== --
+local g = {
+    WalkSpeed = 16,
+    JumpPower = 50,
+    Noclip = false,
+    InfJump = false,
+    Rejoin = false,
+    Hop = false,
+    Esp = false,
+    AntiFling = false,
+    AntiAfk = false,
+    TrollTool = false,
+    TeleportToPlayer = false,
+    SpectateToPlayer = false,
+    MultiFlingBrm = false,
+    Teleport = false,
+    AutoRejoinSummit = false,
+    YahayukLoop = false,
+    CkptwLoop = false,
+    SibuatanLoop = false,
+    LembayanaLoop = false,
+    AtinLoop = false,
+}
+
+-- ==== UTILITY ==== --
+local function safeHumanoidSet(prop,val)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then hum[prop] = val end
+        end
+    end)
+end
+
+-- ==== AUTO REJOIN SYSTEM ==== --
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- koordinat puncak
+    local summitPoints = {
+        Yahayuk = Vector3.new(-611.448059, 906.378845, -537.121033),
+        Ckptw = Vector3.new(1802.000000, 1982.378418, 2168.000000),
+        Sibuatan = Vector3.new(5396.010254, 8110.784668, 2213.931641),
+        Lembayana = Vector3.new(-23430.347656, 6352.698242, -6907.371094),
+        Atin = Vector3.new(823.000000, 2146.322510, 3899.000000)
+    }
+
+    local reachRadius = 3 -- jarak deteksi puncak
+
+    -- fungsi untuk rejoin
+    local function AutoRejoin()
+        print("[Auto Rejoin Summit] Kamu mencapai puncak! Rejoining...")
+        task.wait(1)
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+    end
+
+    -- loop pengecekan posisi karakter
+    while task.wait(1) do
+        if g.AutoRejoinSummit and LocalPlayer.Character and HRP then
+            local currentPos = HRP.Position
+
+            for name, summitPos in pairs(summitPoints) do
+                local distance = (currentPos - summitPos).Magnitude
+                if distance <= reachRadius then
+                    print("[Auto Rejoin Summit] Deteksi puncak:", name)
+                    AutoRejoin()
+                    break
+                end
+            end
+        end
+    end
+end)
+
+-- ==== AUTO LOOP TELEPORT YAHAYUK SISTEM ====
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- Daftar koordinat teleport (urut sesuai rute pendakian)
+    local yahayukPoints = {
+        Vector3.new(-417.732086, 249.378891, 786.940857),    -- CP1
+        Vector3.new(-337.032806, 388.378876, 524.502869),    -- CP2
+        Vector3.new(294.630402, 430.107880, 494.499603),     -- CP3
+        Vector3.new(320.857605, 490.378876, 344.081604),      -- CP4
+        Vector3.new(232.959427, 314.378876, -144.456421),     -- CP5
+        Vector3.new(-611.448059, 906.378845, -537.121033),   -- SUMMIT
+        Vector3.new(-902.000000, 170.378876, 891.000000),     -- BASE
+    }
+
+    local delayTime = 9.0 -- jeda antar teleport (detik)
+
+    while task.wait(1) do
+        if g.YahayukLoop then
+            -- loop dari Base ke Summit
+            for i, pos in ipairs(yahayukPoints) do
+                if not g.YahayukLoop then break end
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character:MoveTo(pos)
+                    print(("[AutoLoop] Teleported to CP %d"):format(i))
+                end
+                task.wait(delayTime)
+            end
+            -- Kembali ke base
+            if g.YahayukLoop then
+                player.Character:MoveTo(yahayukPoints[1])
+                print("[AutoLoop] Kembali ke Base. Ulangi loop...")
+                task.wait(delayTime)
+            end
+        end
+    end
+end)
+
+-- ==== AUTO LOOP TELEPORT CKPTW SISTEM ====
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- Daftar koordinat teleport (urut sesuai rute pendakian)
+    local ckptwPoints = {
+        Vector3.new(512.151672, 161.001846, -534.376709),    -- CP1
+        Vector3.new(390.155762, 310.061584, -187.605545),    -- CP2
+        Vector3.new(100.680374, 412.662872, 612.642151),     -- CP3
+        Vector3.new(10.800644, 601.564636, 996.701599),      -- CP4
+        Vector3.new(871.686768, 865.273560, 582.159607),     -- CP5
+        Vector3.new(1615.082397, 1081.558105, 160.475266),   -- CP6
+        Vector3.new(2967.895264, 1527.978760, 707.978638),   -- CP7
+        Vector3.new(1943.124756, 1744.037598, 1223.344360),  -- CP8
+        Vector3.new(1802.000000, 1982.378418, 2168.000000),  -- Summit
+        Vector3.new(239.000000, 14.378896, -990.000000),     -- Base
+    }
+
+    local delayTime = 9.0 -- jeda antar teleport (detik)
+
+    while task.wait(1) do
+        if g.CkptwLoop then
+            -- loop dari Base ke Summit
+            for i, pos in ipairs(ckptwPoints) do
+                if not g.CkptwLoop then break end
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character:MoveTo(pos)
+                    print(("[AutoLoop] Teleported to CP %d"):format(i))
+                end
+                task.wait(delayTime)
+            end
+            -- Kembali ke base
+            if g.CkptwLoop then
+                player.Character:MoveTo(ckptwPoints[1])
+                print("[AutoLoop] Kembali ke Base. Ulangi loop...")
+                task.wait(delayTime)
+            end
+        end
+    end
+end)
+
+-- ==== AUTO LOOP TELEPORT SIBUATAN SISTEM ====
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- Daftar koordinat teleport (urut sesuai rute pendakian)
+    local sibuatanPoints = {
+        Vector3.new(5396.010254, 8110.784668, 2213.931641),    -- PUNCAK
+    }
+
+    local delayTime = 2.0 -- jeda antar teleport (detik)
+
+    while task.wait(1) do
+        if g.SibuatanLoop then
+            -- loop dari Base ke Summit
+            for i, pos in ipairs(sibuatanPoints) do
+                if not g.SibuatanLoop then break end
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character:MoveTo(pos)
+                    print(("[AutoLoop] Teleported to CP %d"):format(i))
+                end
+                task.wait(delayTime)
+            end
+            -- Kembali ke base
+            if g.SibuatanLoop then
+                player.Character:MoveTo(sibuatanPoints[1])
+                print("[AutoLoop] Kembali ke Base. Ulangi loop...")
+                task.wait(delayTime)
+            end
+        end
+    end
+end)
+
+-- ==== AUTO LOOP TELEPORT LEMBAYANA SISTEM ====
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- Daftar koordinat teleport (urut sesuai rute pendakian)
+    local lembayanaPoints = {
+        Vector3.new(599.000000, 268.076691, 517.000000),    -- CP1
+        Vector3.new(-23430.347656, 6352.698242, -6907.371094),    -- SUMMIT
+    }
+
+    local delayTime = 1.0 -- jeda antar teleport (detik)
+
+    while task.wait(1) do
+        if g.LembayanaLoop then
+            -- loop dari Base ke Summit
+            for i, pos in ipairs(lembayanaPoints) do
+                if not g.LembayanaLoop then break end
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character:MoveTo(pos)
+                    print(("[AutoLoop] Teleported to CP %d"):format(i))
+                end
+                task.wait(delayTime)
+            end
+            -- Kembali ke base
+            if g.LembayanaLoop then
+                player.Character:MoveTo(lembayanaPoints[1])
+                print("[AutoLoop] Kembali ke Base. Ulangi loop...")
+                task.wait(delayTime)
+            end
+        end
+    end
+end)
+
+-- ==== AUTO LOOP TELEPORT ATIN SISTEM ====
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+
+    -- Daftar koordinat teleport (urut sesuai rute pendakian)
+    local atinPoints = {
+        Vector3.new(5.000000, 13.979286, -404.000000),
+        Vector3.new(-184.000000, 129.425385, 409.000031),
+        Vector3.new(-165.000000, 231.038300, 653.000061),
+        Vector3.new(-38.000000, 407.956329, 616.000000),
+        Vector3.new(130.000000, 651.482361, 614.000000),
+        Vector3.new(-247.000000, 667.052979, 735.000000),
+        Vector3.new(-683.420471, 642.119202, 867.463745),
+        Vector3.new(-658.000000, 689.839233, 1458.000000),
+        Vector3.new(-508.000000, 904.273560, 1868.000000),
+        Vector3.new(61.000000, 951.188721, 2088.000000),
+        Vector3.new(52.000000, 982.886108, 2451.000000),
+        Vector3.new(73.000000, 1098.309937, 2458.000000),
+        Vector3.new(263.000000, 1271.468384, 2038.000000),
+        Vector3.new(-419.000000, 1303.526123, 2395.000000),
+        Vector3.new(-771.425598, 1315.218506, 2665.290039),
+        Vector3.new(-838.000000, 1475.692261, 2626.000000),
+        Vector3.new(-469.000000, 1467.001221, 2769.000000),
+        Vector3.new(-468.000000, 1538.606201, 2837.000000),
+        Vector3.new(-383.780273, 1641.560791, 2794.792236),
+        Vector3.new(-209.000000, 1667.074951, 2749.000000),
+        Vector3.new(-232.023468, 1743.454590, 2793.137939),
+        Vector3.new(-425.000000, 1741.758911, 2799.000000),
+        Vector3.new(-424.000000, 1713.798584, 3421.000000),
+        Vector3.new(70.435318, 1720.049072, 3426.502197),
+        Vector3.new(436.000000, 1721.929932, 3430.000000),
+        Vector3.new(626.000000, 1800.740723, 3433.000000),
+        Vector3.new(823.000000, 2146.322510, 3899.000000),
+    }
+
+    local delayTime = 2.0 -- jeda antar teleport (detik)
+
+    while task.wait(1) do
+        if g.AtinLoop then
+            -- loop dari Base ke Summit
+            for i, pos in ipairs(atinPoints) do
+                if not g.AtinLoop then break end
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character:MoveTo(pos)
+                    print(("[AutoLoop] Teleported to CP %d"):format(i))
+                end
+                task.wait(delayTime)
+            end
+            -- Kembali ke base
+            if g.AtinLoop then
+                player.Character:MoveTo(atinPoints[1])
+                print("[AutoLoop] Kembali ke Base. Ulangi loop...")
+                task.wait(delayTime)
+            end
+        end
+    end
+end)
+
+
+WindUI.TransparencyValue = 0.2
+WindUI:SetTheme("Midnight")
+
+local function gradient(text, startColor, endColor)
+    local result = ""
+    for i = 1, #text do
+        local t = (i - 1) / (#text - 1)
+        local r = math.floor((startColor.R + (endColor.R - startColor.R) * t) * 255)
+        local g = math.floor((startColor.G + (endColor.G - startColor.G) * t) * 255)
+        local b = math.floor((startColor.B + (endColor.B - startColor.B) * t) * 255)
+        result = result .. string.format('<font color="rgb(%d,%d,%d)">%s</font>', r, g, b, text:sub(i, i))
+    end
+    return result
+end
+
+-- ==== POPUP ==== --
+WindUI:Popup({
+    Title = gradient("BREMBO GAMING", Color3.fromHex("#6A11CB"), Color3.fromHex("#2575FC")),
+    Icon = "sparkles",
+    Content = "SUBSCRIBE YT BREMBO GAMING",
+    Buttons = {
+        {
+            Title = "MULAI",
+            Icon = "arrow-right",
+            Variant = "Primary",
+            Callback = function() end
+        }
+    }
+})
+
+-- ==== WINDOWS ==== --
+local Window = WindUI:CreateWindow({
+    Title = "BREMBO GAMING",
+    Icon = "monitor",
+    Author = "WELCOME",
+    Folder = "BremboFolder",
+    Size = UDim2.fromOffset(580, 490),
+    Transparent = true,
+    Theme = "Midnight",
+    
+    HidePanelBackground = false,
+    NewElements = false,
+    
+    User = {
+        Enabled = true,
+        Anonymous = true,
+        Callback = function()
+            WindUI:Notify({
+                Title = "USER PROFILE",
+                Content = "USER PROFILE CLICKED!",
+                Duration = 2
+            })
+        end
+    },
+    Acrylic = false,
+    HideSearchBar = false,
+    SideBarWidth = 200,
+    KeySystem = {  
+    Key = { "1234", "5678" },  
+    Note = "Example Key System. With platoboost, etc.",
+    URL = "https://github.com/Footagesus/WindUI",
+    SaveKey = true,
+    },
+})
+
+
+
+-- ==== OPTIONAL ==== --
+Window.User:SetAnonymous(false)
+--Window.User:Disable()
+
+
+
+
+Window:SetIconSize(48)
+
+Window:Tag({
+    Title = "V1.2.3",
+    Color = Color3.fromHex("#30ff6a")
+})
+Window:Tag({
+    Title = "VIP USER",
+    Color = Color3.fromHex("#ffd700")
+})
+local TimeTag = Window:Tag({
+    Title = "--:--",
+    --Radius = 0,
+    --Color = Color3.fromHex("#000000"),
+    Color = WindUI:Gradient({
+        ["0"]   = { Color = Color3.fromHex("#FF0F7B"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#F89B29"), Transparency = 0 },
+    }, {
+        Rotation = 45,
+    }),
+})
+
+
+local hue = 0
+
+-- Rainbow effect & Time 
+task.spawn(function()
+	while true do
+		local now = os.date("*t")
+		local hours = string.format("%02d", now.hour)
+		local minutes = string.format("%02d", now.min)
+		local second = string.format("%02d", now.sec)
+		
+		hue = (hue + 0.01) % 1
+		local color = Color3.fromHSV(hue, 1, 1)
+		
+		TimeTag:SetTitle(hours .. ":" .. minutes .. ":" .. second)
+		--TimeTag:SetColor(color)
+
+		task.wait(0.06)
+	end
+end)
+
+
+Window:CreateTopbarButton("theme-switcher", "moon", function()
+    WindUI:SetTheme(WindUI:GetCurrentTheme() == "Midnight" and "Light" or "Dark")
+    WindUI:Notify({
+        Title = "Theme Changed",
+        Content = "Current theme: "..WindUI:GetCurrentTheme(),
+        Duration = 2
+    })
+end, 990)
+
+-- ==== SECTIONS ==== --
+local Sections = {
+    Main = Window:Section({ Title = "FEATURES", }),
+    Teleport = Window:Section({ Title = "TELEPORT", }),
+    Settings = Window:Section({ Title = "SETTINGS", }),
+    Utilities = Window:Section({ Title = "UTILITIES", })
+}
+
+-- ==== TABS ==== --
+local Tabs = {
+    Main = Sections.Main:Tab({ Title = "MAIN", Icon = "gem" }),
+    Misc = Sections.Main:Tab({ Title = "MISC", Icon = "gem" }),
+    Other = Sections.Main:Tab({ Title = "OTHER", Icon = "gem" }),
+    MtYahayuk = Sections.Teleport:Tab({ Title = "MT YAHAYUK", Icon = "mountain" }),
+    MtCkptw = Sections.Teleport:Tab({ Title = "MT CKPTW", Icon = "mountain" }),
+    MtSibuatan = Sections.Teleport:Tab({ Title = "MT SIBUATAN", Icon = "mountain" }),
+    MtLembayana = Sections.Teleport:Tab({ Title = "MT LEMBAYANA", Icon = "mountain" }),
+    MtAtin = Sections.Teleport:Tab({ Title = "MT ATIN", Icon = "mountain" }),
+    Appearance = Sections.Settings:Tab({ Title = "APPEARANCE", Icon = "brush" }),
+    Config = Sections.Utilities:Tab({ Title = "CONFIGURATION", Icon = "settings" }),
+}
+
+-- ==== TOGGLE INFINITE JUMP ==== --
+local infinitejump = Tabs.Main:Toggle({
+    Title = "InfiniteJump",
+    Desc = "membuat karakter melompat tidak terbatas",
+    Locked = false,
+    Value = g.InfJump,
+    Callback = function(state) 
+        g.InfJump = state
+    end
+})
+UserInputService.JumpRequest:Connect(function()
+    if g.InfJump then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+-- ==== SLIDER JUMP POWER ==== --
+local jumppower = Tabs.Main:Slider({
+    Title = "JumpPower",
+    Desc = "mengatur kekuatan lompatan karakter",
+    Locked = false,
+    Value = { g.JumpPower, Min = 50, Max = 300, Default = 50 },
+    Callback = function(value)
+        g.JumpPower = value
+        safeHumanoidSet("JumpPower", value)
+    end
+})
+
+-- ==== TOGGLE NO CLIP ==== --
+local noclip = Tabs.Main:Toggle({
+    Title = "NoClip",
+    Desc = "membuat karakter menembus apapun",
+    Locked = false,
+    Value = g.Noclip,
+    Callback = function(state) 
+        g.Noclip = state
+            if state then
+            noclipConnection = RunService.Stepped:Connect(function()
+                local char = LocalPlayer.Character
+                if char then
+                    for _,v in ipairs(char:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            pcall(function() v.CanCollide = false end)
+                        end
+                    end
+                end
+            end)
+        else
+            if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect() end
+            -- restore CanCollide
+            local char = LocalPlayer.Character
+            if char then
+                for _,v in ipairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
+
+-- ==== SLIDER WALK SPEED ==== --
+local walkspeed = Tabs.Main:Slider({
+    Title = "WalkSpeed",
+    Desc = "mengatur kecepatan karakter berlari",
+    Locked = false,
+    Value = { g.WalkSpeed, Min = 16, Max = 300, Default = 16 },
+    Callback = function(value)
+        g.WalkSpeed = value
+        safeHumanoidSet("WalkSpeed", value)
+    end
+})
+
+-- ==== BUTTON FLY ==== --
+Tabs.Main:Button({
+    Title = "FLY GUI",
+    Desc = "mengaktifkan menu terbang",
+    Locked = false,
+    Callback = function(state)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/FLY-GUI-V3/refs/heads/main/FLY%20GUI%20V3"))()
+    end
+})
+
+-- ==== BUTTON REJOIN SERVER ==== --
+Tabs.Misc:Button({
+    Title = "Rejoin Server",
+    Desc = "bergabung kembali diserver saat ini",
+    Locked = false,
+    Callback = function(state)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/Rejoin-server/refs/heads/main/Rejoin%20server"))()
+    end
+})
+
+-- ==== BUTTON HOP SERVER ==== --
+Tabs.Misc:Button({
+    Title = "Hop Server",
+    Desc = "bergabung ke server baru / server sepi",
+    Locked = false,
+    Callback = function(state)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/Hop-Server-V2/refs/heads/main/Hop%20Server%20V2"))()
+    end
+})
+
+-- ==== BUTTON ESP ==== --
+local esp = Tabs.Misc:Button({
+    Title = "Esp Box 3D",
+    Desc = "memunculkan kotak esp + anthena",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/ESP-BOX-HIJAU-ANTHENA/refs/heads/main/ESP%20BOX%20HIJAU%20ANTHENA"))()
+    end
+})
+
+-- ==== TELEPORT TO PLAYER GUI BRM ==== --
+local teleport to player = Tabs.Misc:Button({
+    Title = "Teleport To Player",
+    Desc = "memunculkan gui teleport to player",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/TELEPORT-TO-PLAYER/refs/heads/main/teleporttoplayer.txt"))()
+    end
+})
+
+-- ==== SPECTATE TO PLAYER GUI BRM ==== --
+local spectate to player = Tabs.Misc:Button({
+    Title = "Teleport To Player",
+    Desc = "memunculkan gui spectate to player",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/SPECTATE-TO-PLAYER-/refs/heads/main/spectatetoplayer.txt"))()
+    end
+})
+
+-- ==== MULTI FLING GUI BRM ==== --
+local spectate to player = Tabs.Misc:Button({
+    Title = "Teleport To Player",
+    Desc = "memunculkan gui spectate to player",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/MULTI-FLING/refs/heads/main/multiflingbrembo.txt"))()
+    end
+})
+
+-- ==== BUTTON BRINGPART ==== --
+local esp = Tabs.Other:Button({
+    Title = "Bring Part",
+    Desc = "memunculkan tool bring part",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/BringPart/refs/heads/main/BringPart"))()
+    end
+})
+
+-- ==== TOGGLE ANTI FLING === --
+local antifling = Tabs.Other:Toggle({
+    Title = "Anti Fling",
+    Desc = "membuat karakter anti terhadap fling atau lemparan",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/ANTI-FLING/refs/heads/main/antifling.txt"))()
+    end
+})
+
+-- ==== TOGGLE ANTI AFK === --
+local antiafk = Tabs.Other:Toggle({
+    Title = "Anti Afk",
+    Desc = "membuat karakter anti terhadap afk",
+    Locked = false,
+    Callback = function(state) 
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GarapMD/ANTI-AFK/refs/heads/main/ANTI%20AFK"))()
+    end
+})
+
+-- ==== BUTTON TELEPORT YAHAYUK ==== --
+local yahayukbase = Tabs.MtYahayuk:Button({
+    Title = "Teleport To BASE",
+    Desc = "teleport atau berpindah ke basecamp",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-902.000000, 170.378876, 891.000000))
+    end
+})
+
+local yahayukcp1 = Tabs.MtYahayuk:Button({
+    Title = "Teleport To CP 1",
+    Desc = "teleport atau berpindah ke checkpoint 1",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-417.732086, 249.378891, 786.940857))
+    end
+})
+
+local yahayukcp2 = Tabs.MtYahayuk:Button({
+    Title = "Teleport To CP 2",
+    Desc = "teleport atau berpindah ke checkpoint 2",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-337.032806, 388.378876, 524.502869))
+    end
+})
+
+local yahayukcp3 = Tabs.MtYahayuk:Button({
+    Title = "Teleport To CP 3",
+    Desc = "teleport atau berpindah ke checkpoint 3",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(294.630402, 430.107880, 494.499603))
+    end
+})
+
+local yahayukcp4 = Tabs.MtYahayuk:Button({
+    Title = "Teleport To CP 4",
+    Desc = "teleport atau berpindah ke checkpoint 4",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(320.857605, 490.378876, 344.081604))
+    end
+})
+
+local yahayukcp5 = Tabs.MtYahayuk:Button({
+    Title = "Teleport To CP 5",
+    Desc = "teleport atau berpindah ke checkpoint 5",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(232.959427, 314.378876, -144.456421))
+    end
+})
+
+local yahayuksummit = Tabs.MtYahayuk:Button({
+    Title = "Teleport To Puncak",
+    Desc = "teleport atau berpindah ke puncak / summit",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-611.448059, 906.378845, -537.121033))
+    end
+})
+
+-- ==== TOGGLE AUTO REJOIN SUMMIT YAHAYUK ==== --
+local AutoRejoinToggle = Tabs.MtYahayuk:Toggle({
+    Title = "Auto Rejoin Summit",
+    Desc = "saat diaktifkan ketika kamu mencapai puncat maka otomatis rejoin server",
+    Locked = false,
+    Value = g.AutoRejoinSummit,
+    Callback = function(state)
+        g.AutoRejoinSummit = state
+        if state then
+            print("[WindUI] Auto Rejoin Summit: ON")
+        else
+            print("[WindUI] Auto Rejoin Summit: OFF")
+        end
+    end
+})
+
+-- ==== TOGGLE AUTO LOOP TELEPORT YAHAYUK ==== --
+local AutoLoopTeleport = Tabs.MtYahayuk:Toggle({
+    Title = "Auto Loop Teleport",
+    Desc = "teleport otomatis berulang dari base hingga puncak",
+    Locked = false,
+    Value = g.YahayukLoop,
+    Callback = function(state)
+        g.YahayukLoop = state
+        if state then
+            print("[WindUI] Auto Loop Teleport: ON")
+        else
+            print("[WindUI] Auto Loop Teleport: OFF")
+        end
+    end
+})
+
+-- ==== BUTTON TELEPORT CKPTW ==== --
+local ckptwbase = Tabs.MtCkptw:Button({
+    Title = "Teleport To BASE",
+    Desc = "teleport atau berpindah ke basecamp",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(239.000000, 14.378896, -990.000000))
+    end
+})
+
+local ckptwcp1 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 1",
+    Desc = "teleport atau berpindah ke checkpoint 1",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(512.151672, 161.001846, -534.376709))
+    end
+})
+
+local ckptwcp2 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 2",
+    Desc = "teleport atau berpindah ke checkpoint 2",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(390.155762, 310.061584, -187.605545))
+    end
+})
+
+local ckptwcp3 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 3",
+    Desc = "teleport atau berpindah ke checkpoint 3",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(100.680374, 412.662872, 612.642151))
+    end
+})
+
+local ckptwcp4 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 4",
+    Desc = "teleport atau berpindah ke checkpoint 4",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(10.800644, 601.564636, 996.701599))
+    end
+})
+
+local ckptwcp5 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 5",
+    Desc = "teleport atau berpindah ke checkpoint 5",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(871.686768, 865.273560, 582.159607))
+    end
+})
+
+local ckptwcp6 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 6",
+    Desc = "teleport atau berpindah ke checkpoint 6",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(1615.082397, 1081.558105, 160.475266))
+    end
+})
+
+local ckptwcp7 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 7",
+    Desc = "teleport atau berpindah ke checkpoint 7",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(2967.895264, 1527.978760, 707.978638))
+    end
+})
+
+local ckptwcp8 = Tabs.MtCkptw:Button({
+    Title = "Teleport To CP 8",
+    Desc = "teleport atau berpindah ke checkpoint 8",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(1943.124756, 1744.037598, 1223.344360))
+    end
+})
+
+local ckptwsummit = Tabs.MtCkptw:Button({
+    Title = "Teleport To Puncak",
+    Desc = "teleport atau berpindah ke puncak / summit",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(1802.000000, 1982.378418, 2168.000000))
+    end
+})
+
+-- ==== TOGGLE AUTO REJOIN SUMMIT CKPTW ==== --
+local AutoRejoinToggle = Tabs.MtCkptw:Toggle({
+    Title = "Auto Rejoin Summit",
+    Desc = "saat diaktifkan ketika kamu mencapai puncat maka otomatis rejoin server",
+    Locked = false,
+    Value = g.AutoRejoinSummit,
+    Callback = function(state)
+        g.AutoRejoinSummit = state
+        if state then
+            print("[WindUI] Auto Rejoin Summit: ON")
+        else
+            print("[WindUI] Auto Rejoin Summit: OFF")
+        end
+    end
+})
+
+-- ==== TOGGLE AUTO LOOP TELEPORT CKPTW ==== --
+local AutoLoopTeleport = Tabs.MtCkptw:Toggle({
+    Title = "Auto Loop Teleport",
+    Desc = "teleport otomatis berulang dari base hingga puncak",
+    Locked = false,
+    Value = g.CkptwLoop,
+    Callback = function(state)
+        g.CkptwLoop = state
+        if state then
+            print("[WindUI] Auto Loop Teleport: ON")
+        else
+            print("[WindUI] Auto Loop Teleport: OFF")
+        end
+    end
+})
+
+-- ==== BUTTON TELEPORT SIBUATAN ==== --
+local sibuatanbase = Tabs.MtSibuatan:Button({
+    Title = "Teleport To BASE",
+    Desc = "teleport atau berpindah ke basecamp",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(986.535400, 114.178894, -699.993408))
+    end
+})
+
+local sibuatansummit = Tabs.MtSibuatan:Button({
+    Title = "Teleport To Puncak",
+    Desc = "teleport atau berpindah ke puncak / summit",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(5396.010254, 8110.784668, 2213.931641))
+    end
+})
+
+-- ==== TOGGLE AUTO REJOIN SUMMIT SIBUATAN ==== --
+local AutoRejoinToggle = Tabs.MtSibuatan:Toggle({
+    Title = "Auto Rejoin Summit",
+    Desc = "saat diaktifkan ketika kamu mencapai puncat maka otomatis rejoin server",
+    Locked = false,
+    Value = g.AutoRejoinSummit,
+    Callback = function(state)
+        g.AutoRejoinSummit = state
+        if state then
+            print("[WindUI] Auto Rejoin Summit: ON")
+        else
+            print("[WindUI] Auto Rejoin Summit: OFF")
+        end
+    end
+})
+
+-- ==== TOGGLE AUTO LOOP TELEPORT SIBUATAN ==== --
+local AutoLoopTeleport = Tabs.MtSibuatan:Toggle({
+    Title = "Auto Loop Teleport",
+    Desc = "teleport otomatis berulang dari base hingga puncak",
+    Locked = false,
+    Value = g.SibuatanLoop,
+    Callback = function(state)
+        g.SibuatanLoop = state
+        if state then
+            print("[WindUI] Auto Loop Teleport: ON")
+        else
+            print("[WindUI] Auto Loop Teleport: OFF")
+        end
+    end
+})
+
+-- ==== BUTTON TELEPORT LEMBAYANA ==== --
+local lembayanabase = Tabs.MtLembayana:Button({
+    Title = "Teleport To BASE",
+    Desc = "teleport atau berpindah ke basecamp",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(766.000000, 254.378876, 679.000000))
+    end
+})
+
+local lembayanacp1 = Tabs.MtLembayana:Button({
+    Title = "Teleport To CP 1",
+    Desc = "teleport atau berpindah ke checkpoint 1",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(599.000000, 268.076691, 517.000000))
+    end
+})
+
+local lembayanasummit = Tabs.MtLembayana:Button({
+    Title = "Teleport To Puncak",
+    Desc = "teleport atau berpindah ke puncak / summit",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-23430.347656, 6352.698242, -6907.371094))
+    end
+})
+
+-- ==== TOGGLE AUTO REJOIN SUMMIT LEMBAYANA ==== --
+local AutoRejoinToggle = Tabs.MtLembayana:Toggle({
+    Title = "Auto Rejoin Summit",
+    Desc = "saat diaktifkan ketika kamu mencapai puncat maka otomatis rejoin server",
+    Locked = false,
+    Value = g.AutoRejoinSummit,
+    Callback = function(state)
+        g.AutoRejoinSummit = state
+        if state then
+            print("[WindUI] Auto Rejoin Summit: ON")
+        else
+            print("[WindUI] Auto Rejoin Summit: OFF")
+        end
+    end
+})
+
+-- ==== TOGGLE AUTO LOOP TELEPORT CKPTW ==== --
+local AutoLoopTeleport = Tabs.MtLembayana:Toggle({
+    Title = "Auto Loop Teleport",
+    Desc = "teleport otomatis berulang dari base hingga puncak",
+    Locked = false,
+    Value = g.LembayanaLoop,
+    Callback = function(state)
+        g.LembayanaLoop = state
+        if state then
+            print("[WindUI] Auto Loop Teleport: ON")
+        else
+            print("[WindUI] Auto Loop Teleport: OFF")
+        end
+    end
+})
+
+-- ==== BUTTON TELEPORT ATIN ==== --
+local atincp1 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 1",
+    Desc = "teleport atau berpindah ke checkpoint 1",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(5.000000, 13.979286, -404.000000))
+    end
+})
+
+local atincp2 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 2",
+    Desc = "teleport atau berpindah ke checkpoint 2",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-184.000000, 129.425385, 409.000031))
+    end
+})
+
+local atincp3 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 3",
+    Desc = "teleport atau berpindah ke checkpoint 3",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-165.000000, 231.038300, 653.000061))
+    end
+})
+
+local atincp4 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 4",
+    Desc = "teleport atau berpindah ke checkpoint 4",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-38.000000, 407.956329, 616.000000))
+    end
+})
+
+local atincp5 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 5",
+    Desc = "teleport atau berpindah ke checkpoint 5",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(130.000000, 651.482361, 614.000000))
+    end
+})
+
+local atincp6 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 6",
+    Desc = "teleport atau berpindah ke checkpoint 6",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-247.000000, 667.052979, 735.000000))
+    end
+})
+
+local atincp7 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 7",
+    Desc = "teleport atau berpindah ke checkpoint 7",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-683.420471, 642.119202, 867.463745))
+    end
+})
+
+local atincp8 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 8",
+    Desc = "teleport atau berpindah ke checkpoint 8",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-658.000000, 689.839233, 1458.000000))
+    end
+})
+
+local atincp9 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 9",
+    Desc = "teleport atau berpindah ke checkpoint 9",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-508.000000, 904.273560, 1868.000000))
+    end
+})
+
+local atincp10 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 10",
+    Desc = "teleport atau berpindah ke checkpoint 10",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(61.000000, 951.188721, 2088.000000))
+    end
+})
+
+local atincp11 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 11",
+    Desc = "teleport atau berpindah ke checkpoint 11",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(52.000000, 982.886108, 2451.000000))
+    end
+})
+
+local atincp12 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 12",
+    Desc = "teleport atau berpindah ke checkpoint 12",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(73.000000, 1098.309937, 2458.000000))
+    end
+})
+
+local atincp13 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 13",
+    Desc = "teleport atau berpindah ke checkpoint 13",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(263.000000, 1271.468384, 2038.000000))
+    end
+})
+
+local atincp14 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 14",
+    Desc = "teleport atau berpindah ke checkpoint 14",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-419.000000, 1303.526123, 2395.000000))
+    end
+})
+
+local atincp15 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 15",
+    Desc = "teleport atau berpindah ke checkpoint 15",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-771.425598, 1315.218506, 2665.290039))
+    end
+})
+
+local atincp16 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 16",
+    Desc = "teleport atau berpindah ke checkpoint 16",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-838.000000, 1475.692261, 2626.000000))
+    end
+})
+
+local atincp17 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 17",
+    Desc = "teleport atau berpindah ke checkpoint 17",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-469.000000, 1467.001221, 2769.000000))
+    end
+})
+
+local atincp18 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 18",
+    Desc = "teleport atau berpindah ke checkpoint 18",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-468.000000, 1538.606201, 2837.000000))
+    end
+})
+
+local atincp19 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 19",
+    Desc = "teleport atau berpindah ke checkpoint 19",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-383.780273, 1641.560791, 2794.792236))
+    end
+})
+
+local atincp20 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 20",
+    Desc = "teleport atau berpindah ke checkpoint 20",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-209.000000, 1667.074951, 2749.000000))
+    end
+})
+
+local atincp21 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 21",
+    Desc = "teleport atau berpindah ke checkpoint 21",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-232.023468, 1743.454590, 2793.137939))
+    end
+})
+
+local atincp22 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 22",
+    Desc = "teleport atau berpindah ke checkpoint 22",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-425.000000, 1741.758911, 2799.000000))
+    end
+})
+
+local atincp23 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 23",
+    Desc = "teleport atau berpindah ke checkpoint 23",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-424.000000, 1713.798584, 3421.000000))
+    end
+})
+
+local atincp24 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 24",
+    Desc = "teleport atau berpindah ke checkpoint 24",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(70.435318, 1720.049072, 3426.502197))
+    end
+})
+
+local atincp25 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 25",
+    Desc = "teleport atau berpindah ke checkpoint 25",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(436.000000, 1721.929932, 3430.000000))
+    end
+})
+
+local atincp26 = Tabs.MtAtin:Button({
+    Title = "Teleport To CP 26",
+    Desc = "teleport atau berpindah ke checkpoint 26",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(626.000000, 1800.740723, 3433.000000))
+    end
+})
+
+local summit = Tabs.MtAtin:Button({
+    Title = "Teleport To Puncak",
+    Desc = "teleport atau berpindah ke puncak / summit",
+    Locked = false,
+    Callback = function(state) 
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(823.000000, 2146.322510, 3899.000000))
+    end
+})
+
+-- ==== TOGGLE AUTO REJOIN SUMMIT ATIN ==== --
+local AutoRejoinToggle = Tabs.MtAtin:Toggle({
+    Title = "Auto Rejoin Summit",
+    Desc = "saat diaktifkan ketika kamu mencapai puncat maka otomatis rejoin server",
+    Locked = false,
+    Value = g.AutoRejoinSummit,
+    Callback = function(state)
+        g.AutoRejoinSummit = state
+        if state then
+            print("[WindUI] Auto Rejoin Summit: ON")
+        else
+            print("[WindUI] Auto Rejoin Summit: OFF")
+        end
+    end
+})
+
+-- ==== TOGGLE AUTO LOOP TELEPORT ATIN ==== --
+local AutoLoopTeleport = Tabs.MtAtin:Toggle({
+    Title = "Auto Loop Teleport",
+    Desc = "teleport otomatis berulang dari base hingga puncak",
+    Locked = false,
+    Value = g.AtinLoop,
+    Callback = function(state)
+        g.AtinLoop = state
+        if state then
+            print("[WindUI] Auto Loop Teleport: ON")
+        else
+            print("[WindUI] Auto Loop Teleport: OFF")
+        end
+    end
+})
+
+-- ==== PARAGRAPH ==== --
+Tabs.Appearance:Paragraph({
+    Title = "Customize Interface",
+    Desc = "Personalize your experience",
+    Image = "palette",
+    ImageSize = 20,
+    Color = "White"
+})
+
+local themes = {}
+for themeName, _ in pairs(WindUI:GetThemes()) do
+    table.insert(themes, themeName)
+end
+table.sort(themes)
+
+local canchangetheme = true
+local canchangedropdown = true
+
+-- ==== DROPDOWN ==== --
+local themeDropdown = Tabs.Appearance:Dropdown({
+    Title = "THEME SELECT",
+    Values = themes,
+    SearchBarEnabled = true,
+    MenuWidth = 280,
+    Value = "Midnight",
+    Callback = function(theme)
+        canchangedropdown = false
+        WindUI:SetTheme(theme)
+        WindUI:Notify({
+            Title = "Theme Applied",
+            Content = theme,
+            Icon = "palette",
+            Duration = 2
+        })
+        canchangedropdown = true
+    end
+})
+
+-- ==== SLIDER ==== --
+local transparencySlider = Tabs.Appearance:Slider({
+    Title = "TRANSPARENCY",
+    Value = { 
+        Min = 0,
+        Max = 1,
+        Default = 0.2,
+    },
+    Step = 0.1,
+    Callback = function(value)
+        WindUI.TransparencyValue = tonumber(value)
+        Window:ToggleTransparency(tonumber(value) > 0)
+    end
+})
+
+-- ==== TOGGLE ==== --
+local ThemeToggle = Tabs.Appearance:Toggle({
+    Title = "Enable Dark Mode",
+    Desc = "Use dark color scheme",
+    Value = true,
+    Callback = function(state)
+        if canchangetheme then
+            WindUI:SetTheme(state and "Dark" or "Light")
+        end
+        if canchangedropdown then
+            themeDropdown:Select(state and "Dark" or "Light")
+        end
+    end
+})
+
+WindUI:OnThemeChange(function(theme)
+    canchangetheme = false
+    ThemeToggle:Set(theme == "Midnight")
+    canchangetheme = true
+end)
+
+-- ==== BUTTON ==== --
+Tabs.Appearance:Button({
+    Title = "Create New Theme",
+    Icon = "plus",
+    Callback = function()
+        Window:Dialog({
+            Title = "Create Theme",
+            Content = "This feature is coming soon!",
+            Buttons = {
+                {
+                    Title = "OK",
+                    Variant = "Primary"
+                }
+            }
+        })
+    end
+})
+
+-- ==== PARAGRAPH ==== --
+Tabs.Config:Paragraph({
+    Title = "Configuration Manager",
+    Desc = "Save and load your settings",
+    Image = "save",
+    ImageSize = 20,
+    Color = "White"
+})
+
+local configName = "default"
+local configFile = nil
+local MyPlayerData = {
+    name = "Player1",
+    level = 1,
+    inventory = { "sword", "shield", "potion" }
+}
+
+-- ==== INPUT ==== --
+Tabs.Config:Input({
+    Title = "Config Name",
+    Value = configName,
+    Callback = function(value)
+        configName = value or "default"
+    end
+})
+
+-- ==== CONFIG MANAGER ==== --
+local ConfigManager = Window.ConfigManager
+if ConfigManager then
+    ConfigManager:Init(Window)
+    
+    Tabs.Config:Button({
+        Title = "SAVE CONFIG",
+        Icon = "save",
+        Variant = "Primary",
+        Callback = function()
+            configFile = ConfigManager:CreateConfig(configName)
+            
+            configFile:Register("featureToggle", featureToggle)
+            configFile:Register("intensitySlider", intensitySlider)
+            configFile:Register("testDropdown", testDropdown)
+            configFile:Register("themeDropdown", themeDropdown)
+            configFile:Register("transparencySlider", transparencySlider)
+            
+            configFile:Set("playerData", MyPlayerData)
+            configFile:Set("lastSave", os.date("%Y-%m-%d %H:%M:%S"))
+            
+            if configFile:Save() then
+                WindUI:Notify({ 
+                    Title = "SAVE CONFIG", 
+                    Content = "Saved as: "..configName,
+                    Icon = "check",
+                    Duration = 3
+                })
+            else
+                WindUI:Notify({ 
+                    Title = "Error", 
+                    Content = "Failed to save config",
+                    Icon = "x",
+                    Duration = 3
+                })
+            end
+        end
+    })
+
+-- ==== BUTTON ==== --
+    Tabs.Config:Button({
+        Title = "LOAD CONFIG",
+        Icon = "folder",
+        Callback = function()
+            configFile = ConfigManager:CreateConfig(configName)
+            local loadedData = configFile:Load()
+            
+            if loadedData then
+                if loadedData.playerData then
+                    MyPlayerData = loadedData.playerData
+                end
+                
+                local lastSave = loadedData.lastSave or "Unknown"
+                WindUI:Notify({ 
+                    Title = "LOAD CONFIG", 
+                    Content = "Loaded: "..configName.."\nLast save: "..lastSave,
+                    Icon = "refresh-cw",
+                    Duration = 5
+                })
+                
+                Tabs.Config:Paragraph({
+                    Title = "Player Data",
+                    Desc = string.format("Name: %s\nLevel: %d\nInventory: %s", 
+                        MyPlayerData.name, 
+                        MyPlayerData.level, 
+                        table.concat(MyPlayerData.inventory, ", "))
+                })
+            else
+                WindUI:Notify({ 
+                    Title = "Error", 
+                    Content = "Failed to load config",
+                    Icon = "x",
+                    Duration = 3
+                })
+            end
+        end
+    })
+else
+    Tabs.Config:Paragraph({
+        Title = "Config Manager Not Available",
+        Desc = "This feature requires ConfigManager",
+        Image = "alert-triangle",
+        ImageSize = 20,
+        Color = "White"
+    })
+end
+
+-- ==== LAINNYA ==== --
+Window:OnClose(function()
+    print("Window closed")
+    
+    if ConfigManager and configFile then
+        configFile:Set("playerData", MyPlayerData)
+        configFile:Set("lastSave", os.date("%Y-%m-%d %H:%M:%S"))
+        configFile:Save()
+        print("Config auto-saved on close")
+    end
+end)
+
+Window:OnDestroy(function()
+    print("Window destroyed")
+end)
+
+Window:OnOpen(function()
+    print("Window opened")
+end)
+
+
+
+-- lock all elements
+Window:UnlockAll()
+
+-- unlock all elements
+--Window:UnlockAll()
+
+-- unlock all elements in tab
+task.wait(0.05)
+--  no working :( idk why 
+-- Tabs.Elements:LockAll()
+
+if Window:GetUnlocked() and #Window:GetUnlocked() > 0 then
+    print("Locked Elements in Window: ")
+    for _, lockedelement in next, Window:GetUnlocked() do
+        local title = lockedelement.Title
+        if string.find(title, Localization.Prefix) then
+            local translations = Localization.Translations[WindUI.Creator.Language] or Localization.Translations[Localization.DefaultLanguage]
+            title = translations[ title:gsub("^" .. Localization.Prefix, "") ]
+        end
+        print("- " .. (title or "Unknown"))
+    end
+    
+end
